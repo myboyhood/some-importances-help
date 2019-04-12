@@ -1,0 +1,100 @@
+ubuntu18.04 has installed python3 with itself.
+
+-----------------------------1----------------------------------------------------------
+-----VPN
+www.heyssr.xin
+lack of ppa,check the blog following
+https://blog.csdn.net/a912952381/article/details/81172971
+set port 10801
+
+----------------------------2--------------------------------------------------------
+souguopinyin
+https://pinyin.sogou.com/linux/?r=pinyin
+记得把语言与区域里 管理已安装语言 中的汉语用鼠标拖到最上面
+需要重启或者用户log out后再登录（也就是注销再登录） 
+
+---------------------------3---------------------------------------------------------
+Terminator
+sudo apt-get install terminator
+
+---------------------------4---------------------------------------------------------
+CMAKE
+sudo apt-get install cmake
+
+---------------------------5---------------------------------------------------------
+安装ROS
+it can resolves many package lost,
+eg.pkg-config can be install with ROS
+
+安装完ROS可以去安装Pangolin  Eigen3  
+下载ORBSLAM2
+DBoW2 and g2o这两个在ORBSLAM2的Thirdparty里 
+
+
+
+---------------------------6---------------------------------------------------------
+OpenGL
+https://blog.csdn.net/qq_38228254/article/details/78521155
+-------step
+sudo apt-get install build-essential
+sudo apt-get install libgl1-mesa-dev
+sudo apt-get install freeglut3-dev
+
+after install ,there is no problem when I test  his example.
+
+
+----------------------7--------------------------------------------------------------
+opencv3.2 and opencv_contrib3.2
+-----7.1-----如何安装opencv3.2 plus contrib
+https://blog.csdn.net/hlxcsdn/article/details/82768767
+
+-----7.2-----Ubuntu18.04下安装OpenCv依赖包libjasper-dev无法安装的问题
+前提是自己先打开VPN，再添加源
+https://blog.csdn.net/weixin_41053564/article/details/81254410
+
+-----7.3-----cmake中找不到ippicv_linux_20151201.tgz
+https://github.com/opencv/opencv_3rdparty/tree/ippicv/master_20151201/ippicv
+放到/home/ubuntu/thirdparty/opencv-3.2.0/3rdparty/ippicv/downloads/linux-808b791a6eac9ed78d32a7666804320e下面
+
+-----7.4-----还有一个在cmake中应该添加的配置 -DENABLE_PRECOMPILED_HEADERS=OFF 
+也就是最后cmake的样子是这样的
+ubuntu@Dell:~/thirdparty/opencv-3.2.0/build$ cmake -DOPENCV_EXTRA_MODULES_PATH=/home/ubuntu/thirdparty/opencv-3.2.0/opencv_contrib-3.2.0/modules /home/ubuntu/thirdparty/opencv-3.2.0 -DENABLE_PRECOMPILED_HEADERS=OFF
+
+发现Downloading v3.1.0/protobuf-cpp-3.1.0.tar.gz...这个也下载很慢，
+其实最后也可以下载的，有23MB多，耐心等待
+
+最后make成功，然后sudo make install
+
+-----------------------8-----------------------------------------------
+wget 是个工具，有断点接续，有人说下载很快，但我自己尝试下载ippicv_linux_20151201.tgz时感觉速度一般。
+
+-----------------------9------------------------------------------------
+Eigen3源码安装（为避免后面跑ORBSLAM1 时launch文件时出现错误，这里安装3.1.0这样一个低版本）
+非常神奇，这个库全部由头文件组成，不需要cmake安装等，只需要像下面把文件移到正确的文件夹中
+安装参考：https://www.cnblogs.com/newneul/p/8256803.html
+当时我的命令：
+解压之后
+sudo mv /home/ubuntu/thirdparty/eigen-eigen-5097c01bcdc4 /usr/local/include/eigen3
+sudo cp -r /usr/local/include/eigen3/Eigen /usr/local/include 
+
+---------------------10-----------------------------------------------
+接下来我们只差
+DBoW2 and g2o (Included in Thirdparty folder)
+
+因为usleep()函数没有头文件
+#include "unistd.h"
+所以在编译ORBSLAM2之前，先在/include/system.h里添加这个头文件
+
+直接使用ORBSLAM2中的build文件
+cd ORB_SLAM2
+chmod +x build.sh
+./build.sh
+
+下载数据集
+wget https://vision.in.tum.de/rgbd/dataset/freiburg1/rgbd_dataset_freiburg1_desk2.tgz
+
+下面是例子去跑TUM_DATASET的monocular
+./Examples/Monocular/mono_tum Vocabulary/ORBvoc.txt Examples/Monocular/TUM1.yaml /home/ubuntu/visual_slam/dataset/rgbd_dataset_freiburg1_desk2
+
+
+
