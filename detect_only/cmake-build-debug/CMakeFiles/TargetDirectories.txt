@@ -1,0 +1,3 @@
+/home/ubuntu/visual_slam/detect/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/ubuntu/visual_slam/detect/cmake-build-debug/CMakeFiles/detect.dir
+/home/ubuntu/visual_slam/detect/cmake-build-debug/CMakeFiles/edit_cache.dir

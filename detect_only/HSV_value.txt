@@ -1,0 +1,9 @@
+right.png && center.png
+hmin = 340
+hmax = 360
+
+smin = 120
+smax = 255
+
+vmin = 90
+vmax = 255
