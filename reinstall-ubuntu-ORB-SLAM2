@@ -96,5 +96,7 @@ wget https://vision.in.tum.de/rgbd/dataset/freiburg1/rgbd_dataset_freiburg1_desk
 下面是例子去跑TUM_DATASET的monocular
 ./Examples/Monocular/mono_tum Vocabulary/ORBvoc.txt Examples/Monocular/TUM1.yaml /home/ubuntu/visual_slam/dataset/rgbd_dataset_freiburg1_desk2
 
+直接把ROS的包放到catkin_ws/src下,然后去编译catkin_make是有可能找不到在devel/lib/下的可执行文件的，也就是不能rosrun,我当时一个利用动捕记录相机xyz的程序就是是在src下有rospack find 找得到，但不能rosrun。
+方法可以是catkin_create_pkg <package name> 这样devel下也会生成相应文件，把想要的源文件拷进去src就行了,写好cmakelist和package.xml,再catkin_make。
 
-
+另外Package.xml出了Format =‘02’版本，里面<run_depend>变成了<exec_depend>,注意！！
