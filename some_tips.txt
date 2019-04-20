@@ -1,0 +1,1 @@
+1.在clion里面小锤子编译的ROS程序，也可以点击绿色小箭头运行，在它的cmake-build-debug里也有一些ROS的东西。不一定这个ROS程序要放在catkin_ws下catkin_make才能运行，放在任何位置都可以。
