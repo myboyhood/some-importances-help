@@ -1,0 +1,346 @@
+1.如果没有安装ROS，可以去PX4官网使用脚本[链接](https://dev.px4.io/en/setup/dev_env_linux_ubuntu.html)将ROS和PX4一起安装
+2.如果已安装ROS-kinetic，按下面步骤手动配置。
+
+#手动配置
+1.先安装MAVROS
+
+ 1. 二进制版本[官网](https://github.com/mavlink/mavros/blob/master/mavros/README.md#installation)
+ 2. 源码编译
+##安装编译工具：
+ 
+
+```
+sudo apt-get install python-catkin-tools python-rosinstall-generator -y
+```
+ 创建存放mavros的工作空间，这里推荐放在一个新建的单独的工作空间，因为按照这个教程走下去后，该工作空间只能用catkin build指令编译而不能用catkin_make了。
+ 
+
+```
+mkdir -p ~/mavros_ws/src
+cd ~/mavros_ws
+catkin init
+wstool init src
+```
+更新保证获取到最新的稳定版mavlink和mavros：
+
+```
+rosinstall_generator --rosdistro kinetic mavlink | tee /tmp/mavros.rosinstall
+rosinstall_generator --upstream mavros | tee -a /tmp/mavros.rosinstall
+```
+##归并工作链，准备开始安装：
+ 
+
+```
+wstool merge -t src /tmp/mavros.rosinstall
+wstool update -t src -j12
+rosdep install --from-paths src --ignore-src -y
+```
+  其中第二行命令的-j多少，后面的数字最好是你cpu的线程数
+
+  这个过程中网速一定要好，不然clone源码这一步会卡住，会一直出现mavros | mavlink active啥啥的。
+
+##安装GeographicLib datasets：
+   
+
+```
+./src/mavros/mavros/scripts/install_geographiclib_datasets.sh
+```
+##编译源码（在工作空间下）：
+
+```
+catkin build
+```
+ 如果你想每个终端都常用的话,`source ~/mavros_ws/devel/setup.bash`这句话添加到
+ ~/.bashrc文件中，否则就只在这个终端里source一下就行了。
+
+#ROS和MAVROS都安装完了。
+开始安装一些依赖
+##权限设置
+
+`sudo usermod -a -G dialout $USER`
+
+然后注销后，重新登录，因为重新登录后所做的改变才会有效
+```
+sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
+sudo apt-get update
+```
+## 必备软件(python、git、qt)
+```
+sudo apt-get install python-argparse git-core wget zip \
+    python-empy qtcreator cmake build-essential genromfs -y
+```
+## 仿真工具
+```
+sudo add-apt-repository ppa:openjdk-r/ppa
+sudo apt-get update
+sudo apt-get install openjdk-8-jre
+sudo apt-get install ant protobuf-compiler libeigen3-dev libopencv-dev openjdk-8-jdk openjdk-8-jre clang-3.5 lldb-3.5 -y
+```
+##卸载模式管理器
+`sudo apt-get remove modemmanager`
+
+##更新包列表和安装下面的依赖包
+```
+sudo add-apt-repository ppa:terry.guo/gcc-arm-embedded -y
+sudo add-apt-repository ppa:team-gcc-arm-embedded/ppa
+sudo apt-get update
+sudo apt-get install python-serial openocd \
+    flex bison libncurses5-dev autoconf texinfo build-essential \
+    libftdi-dev libtool zlib1g-dev \
+    python-empy gcc-arm-none-eabi -y
+```
+问题：sudo add-apt-repository ppa:terry.guo/gcc-arm-embedded有问题
+报错：udo add-apt-repository ppa:terry.guo/gcc-arm-embedded
+ tag:launchpad.net:2008:redacte
+
+##安装git
+`sudo apt-get install git-all`
+
+##按照另一篇博客再安装一些依赖，可能有重复，没事
+```
+sudo apt-get update -y
+sudo apt-get install git zip cmake  build-essential genromfs ninja-build -y
+```
+# Required python packages
+```
+sudo apt-get install python-argparse   python-empy python-toml python-numpy   python-dev python-pip -y
+sudo -H pip install --upgrade pip
+sudo -H pip install pandas jinja2 pyserial
+# optional python tools
+`sudo -H pip install pyulog`
+```
+##安装Ninja编译工具：
+`sudo apt-get install ninja-build -y`
+
+##安装FastRTPS开发环境：
+```
+wget http://www.eprosima.com/index.php/component/ars/repository/eprosima-fast-rtps/eprosima-fast-rtps-1-5-0/eprosima_fastrtps-1-5-0-linux-tar-gz -O eprosima_fastrtps-1-5-0-linux.tar.gz
+tar -xzf eprosima_fastrtps-1-5-0-linux.tar.gz eProsima_FastRTPS-1.5.0-Linux/
+tar -xzf eprosima_fastrtps-1-5-0-linux.tar.gz requiredcomponents
+tar -xzf requiredcomponents/eProsima_FastCDR-1.0.7-Linux.tar.gz
+ ```
+ ```
+cd eProsima_FastCDR-1.0.7-Linux
+./configure --libdir=/usr/lib
+make -j12
+sudo make install
+cd ..
+cd eProsima_FastRTPS-1.5.0-Linux
+./configure --libdir=/usr/lib
+make -j12
+sudo make install
+cd ..
+rm -rf requiredcomponents eprosima_fastrtps-1-5-0-linux.tar.gz
+```
+make后面的j后的数字改为你cpu的线程数
+
+##配置Nuttx开发环境：
+```
+sudo apt-get install python-serial openocd flex bison libncurses5-dev autoconf texinfo  libftdi-dev libtool zlib1g-dev -y
+```
+##配置arm gcc编译器：
+`sudo apt-get remove gcc-arm-none-eabi gdb-arm-none-eabi binutils-arm-none-eabi gcc-arm-embedded`
+`sudo add-apt-repository --remove ppa:team-gcc-arm-embedded/ppa`
+
+##运行下面这个脚本，建立script.sh ,粘贴进去，然后终端使用 bash script.sh 运行：
+```
+pushd .
+cd ~
+wget https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/7-2017q4/gcc-arm-none-eabi-7-2017-q4-major-linux.tar.bz2
+tar -jxf gcc-arm-none-eabi-7-2017-q4-major-linux.tar.bz2
+exportline="export PATH=$HOME/gcc-arm-none-eabi-7-2017-q4-major/bin:\$PATH"
+if grep -Fxq "$exportline" ~/.profile; then echo nothing to do ; else echo $exportline >> ~/.profile; fi
+popd
+```
+##然后重启电脑
+
+##检查是否安装成功：
+`arm-none-eabi-gcc --version`
+
+如果输出了像下面这样的：
+
+arm-none-eabi-gcc (GNU Tools for Arm Embedded Processors 7-2017-q4-major) 7.2.1 20170904 (release) [ARM/embedded-7-branch revision 255204]
+Copyright (C) 2017 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+你成功了！
+
+
+##安装ＱＧＣ（QGroundControl）地面站：
+
+直接去官网下下来，直接给权限就可以运行了。
+[链接](https://docs.qgroundcontrol.com/en/getting_started/download_and_install.html)
+
+##下载源码
+
+`cd ~`
+`git clone https://github.com/PX4/Firmware.git`
+`cd Firmware`
+`git submodule update --init --recursive`
+
+##编译
+`make posix jmavsim`
+过程中会再clone一些东西，不要急，等一会儿就OK了，成功后会出现一个小飞机，可以通过命令来控制它
+```
+commander takeoff  #起飞
+commander land   #降落
+```
+
+##下面生成可以烧在pixhawk板子上的
+在Firware文件夹下面：
+`make px4fmu-v4_default`
+过程中也会下载很多东西，等一会儿就OK
+
+最终没有报错，输出：
+
+-- Build files have been written to: /home/youruser/src/Firmware/build/nuttx_px4fmu-v4_default
+[954/954] Creating /home/youruser/src/Firmware/build/nuttx_px4fmu-v4_default/px4fmu-v4_default.px4
+
+就OK了！恭喜你配完了！
+
+（过程中的报错基本全是网速的锅，一定要找个网速好的地方！或者翻墙！）
+
+##关于build的固件版本：
+
+    Pixhawk 4: make px4fmu-v5_default
+    Pixracer: make px4fmu-v4_default
+    Pixhawk 3 Pro: make px4fmu-v4pro_default
+    Pixhawk Mini: make px4fmu-v3_default
+    Pixhawk 2: make px4fmu-v3_default
+    mRo Pixhawk: make px4fmu-v3_default (supports 2MB Flash)
+    HKPilot32: make px4fmu-v2_default
+    Pixfalcon: make px4fmu-v2_default
+    Dropix: make px4fmu-v2_default
+    MindPX/MindRacer: make mindpx-v2_default
+    mRo X-2.1: make auav-x21_default
+    Crazyflie 2.0: make crazyflie_default
+    Intel® Aero Ready to Fly Drone: make aerofc-v1_default
+    Pixhawk 1: make px4fmu-v2_default
+
+##烧录在板子上：
+`make px4fmu-v4_default upload`
+  成功的话会显示：
+
+  Erase  : [====================] 100.0%
+  Program: [====================] 100.0%
+  Verify : [====================] 100.0%
+  Rebooting.
+
+  [100%] Built target upload
+
+##搭建Qt开发环境：
+
+在与Firmware平级的目录下，
+```
+mkdir Firmware-build
+cd Firmware-build
+cmake ../Firmware -G "CodeBlocks - Unix Makefiles"
+```
+然后在Qt中open a project，选择这个Firmware的CMakeLists.txt，打开就OK了，就可以看到整个工程了。
+
+#开始实验jMAVSim仿真
+```
+cd ~/Firmware
+make px4_sitl_default jmavsim
+```
+可以在终端中输入指令进行飞行操作
+`commander takeoff`
+
+Linux下可以用两种方法打开QGC，建议选择AppImage，点击图片就可以运行，不用每次都输入冗长的`./qgroundcontrol-start.sh`。
+建议下载完成后将文件复制到Home目录下，并执行下列操作增加可执行权限
+`chmod +x ./QGroundControl.AppImage`
+
+#GAZEBO仿真
+在运行 Gazebo 仿真之前首先要进行相关文件的配置
+##Gazebo配置
+安装protobuf库，它用作Gazebo的接口。
+`sudo apt-get install libprotobuf-dev libprotoc-dev protobuf-compiler libeigen3-dev `
+在仿真文件夹目录顶层创建一个 build 文件夹
+```
+cd ~/Firmware/Tools/sitl_gazebo
+mkdir build
+```
+
+##添加路径
+```
+设置插件的路径以便 Gazebo 能找到模型文件
+  export GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:$HOME/src/Firmware/Tools/sitl_gazebo/Build
+设置模型路径以便 Gazebo 能找到机型
+  export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:$HOME/src/Firmware/Tools/sitl_gazebo/models
+禁用在线模型查找
+  export GAZEBO_MODEL_DATABASE_URI=""
+设置 sitl_gazebo 文件夹的路径
+  export SITL_GAZEBO_PATH=$HOME/src/Firmware/Tools/sitl_gazebo
+```
+
+##切换到构建目录并从中调用CMake
+```
+cd build
+cmake ..
+```
+
+##构建 gazebo 插件
+`make`
+
+##现在就可以运行Gazebo仿真了，以最基本的iris仿真为例
+```
+cd ~/Firmware
+make px4_sitl_default gazebo
+```
+还有其他的机型[px4中文]（https://fantasyjxf.gitbooks.io/px4-wiki/content/4_Simulation/gazebo_simulation.html）
+
+#建立自己的外部控制程序包
+
+外部控制程序offboard_node.cpp以及释义请点击PX4中文维基。
+[px4链接]（https://fantasyjxf.gitbooks.io/px4-wiki/content/10_Robotics-using-ROS/ros-mavros-offboard.html）
+根据ROS官网教程，先建一个ROS包，
+```
+$ cd ~/catkin_ws/src
+$ catkin_create_pkg offboard roscpp mavros geometry_msgs
+```
+这一步会创建一个名为offboard的新程序包，这个程序包依赖于roscpp 、mavros以及geometry_msgs。
+
+在offboard目录下生自动成两个文件夹include和src。我们将外部控制例程offboard_node.cpp放入刚刚生成的src目录下。然后修改/catkin_ws/src/offboard目录下的CMakeLists.txt文件。取消掉一些注释，生成相应节点（否则会出现找不到节点的错误）。
+注意： 
+1.add_executable(offboard_node src/offboard_node.cpp)
+第一个offboard_node是我们根据src/offboard_node.cpp创建的节点的名称
+2.target_link_libraries(offboard_node ${catkin_LIBRARIES})
+
+再在offboard_node.cpp修改一个在65行offb_set_mode.response.success  ------> offb_set_mode.response.mode_sent
+
+`$ cd ~/catkin_ws`
+`$ catkin_make`
+
+
+##启动仿真
+通过MAVROS应用在Gazebo模拟的Iris四旋翼上。最后，应该会看到飞行器缓慢起飞到高度2米.
+```
+切换到固件目录
+cd ~/Firmware
+启动gazebo仿真
+make px4_sitl_default gazebo
+启动MAVROS,链接到本地ROS
+roslaunch mavros px4.launch fcu_url:="udp://:14540@127.0.0.1:14557"
+运行外部控制程序
+rosrun offboard offboard_node
+```
+###或者可以先升级ROS环境后启动px4的节点（我没试过）
+```
+cd <Firmware_clone> 
+make posix_sitl_default
+source ~/catkin_ws/devel/setup.bash    // (只有mavros是用源码编译的才需要)
+source Tools/setup_gazebo.bash $(pwd) $(pwd)/build_posix_sitl_default
+export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:$(pwd)
+export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:$(pwd)/Tools/sitl_gazebo
+roslaunch px4 mavros_posix_sitl.launch
+```
+
+
+
+
+
+
+
+
+
