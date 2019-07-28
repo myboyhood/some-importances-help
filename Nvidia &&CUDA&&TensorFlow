@@ -1,0 +1,32 @@
+`
+安装nvidia我尝试了2种方法。
+`
+``
+1.找到合适驱动nvidia-430.run，使用run xxx.run -no-opengl-files
+``
+这种教程装完之后我可以nvidia-smi看到方框，但是nvidia-settings显示不能从内核加载任何模型
+可能是我安装过程中选择register kernel选错了，但好像选什么都一样失败
+最后我卸载了nvidia驱动，不然我连Settings都打不开，而且ubuntu报一堆错误。
+现在使用的还是intel显卡
+
+
+``
+2.使用ppa安装
+``
+也就是sudo apt-get install nvidia-430 安装之后可以打开nvidia-settings的UI界面，但是找不到prime-profile这个切换显卡的选项。
+另外，这种情况经常开机导致黑屏，显示“low graphic mode”，选择exit to console control，我可以输入sudo prime-select intel,切换到intel显卡。
+接着，sudo service lightdm start就可以进入图形登录界面了。
+
+`
+CUDA（nvidia && CUDA && TF有版本对应，可以去TF官网查看）
+`
+我看到nvidia-smi驱动方框中显示CUDA是10.1，我就直接去安装10.1的CUDA，很简单，一般没问题。
+
+`
+TensorFlow
+`
+我直接按照TF官网，安装[https://tensorflow.google.cn/install/source],按理说要从源码安装，但我看到页面上有
+Note: We already provide well-tested, pre-built TensorFlow packages for Linux and macOS systems.
+我就直接点击去，后来发现这是binary版本。而且是安在python虚拟环境中。
+我在使用时，要先利用./venv打开python的虚拟环境，建立一个.py文件就可以跑TF程序，但教程里经常Loading网上的素材啥的，贼卡，下不来，VPN也不行。
+
