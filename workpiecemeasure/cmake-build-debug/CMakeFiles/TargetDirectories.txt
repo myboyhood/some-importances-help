@@ -1,0 +1,3 @@
+/home/wzy/softwares/CLion-2019.3/projects/workpiecemeasure/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/wzy/softwares/CLion-2019.3/projects/workpiecemeasure/cmake-build-debug/CMakeFiles/workpiecemeasure.dir
+/home/wzy/softwares/CLion-2019.3/projects/workpiecemeasure/cmake-build-debug/CMakeFiles/edit_cache.dir
